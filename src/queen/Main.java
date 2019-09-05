@@ -1,5 +1,6 @@
 package queen;
 
+import com.sun.javafx.application.PlatformImpl;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -8,9 +9,11 @@ import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -24,7 +27,7 @@ import java.util.ArrayList;
 
 public class Main extends Application {
 
-    private static final int INTERVAL_SEC = 1;
+    private static final int INTERVAL_SEC = 10;
 
     private static final int DAY_JUMP_HOUR = 8;
 
@@ -41,13 +44,28 @@ public class Main extends Application {
 
     private TextArea resultText;
 
+    private Label updateLabel;
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         VBox wrapper = new VBox();
         wrapper.setPadding(new Insets(16));
 
+        HBox header = new HBox();
+
         DatePicker datePicker = new DatePicker();
-        wrapper.getChildren().add(datePicker);
+        datePicker.setValue(this.selectedDate);
+        header.getChildren().add(datePicker);
+
+        Button openKingButton = new Button();
+        openKingButton.setText("打刻");
+        openKingButton.setOnMouseClicked(event -> {
+            this.openKing();
+        });
+        header.getChildren().add(openKingButton);
+
+        HBox.setMargin(openKingButton, new Insets(0, 0, 0, 16));
+        wrapper.getChildren().add(header);
 
         this.resultText = new TextArea();
         this.resultText.setMaxWidth(300);
@@ -56,19 +74,21 @@ public class Main extends Application {
         VBox.setMargin(this.resultText, new Insets(16, 0, 0, 0));
         wrapper.getChildren().add(this.resultText);
 
-        Label updateLabel = new Label();
-        VBox.setMargin(updateLabel, new Insets(16, 0, 0, 0));
-        wrapper.getChildren().add(updateLabel);
+        this.updateLabel = new Label();
+        VBox.setMargin(this.updateLabel, new Insets(16, 0, 0, 0));
+        wrapper.getChildren().add(this.updateLabel);
 
         datePicker.setOnAction(event -> {
             this.update(this.calc(datePicker.getValue()));
         });
 
+        this.update(this.calc(LocalDate.now()));
+
         Scene rootScene = new Scene(wrapper);
         primaryStage.setTitle("Queen of Time");
+        primaryStage.setResizable(false);
         primaryStage.setScene(rootScene);
         primaryStage.show();
-
         Timeline timer = new Timeline(new KeyFrame(javafx.util.Duration.seconds(INTERVAL_SEC), (ActionEvent event) -> {
             Point position = MouseInfo.getPointerInfo().getLocation();
             if (!this.prevPosition.equals(position)) {
@@ -84,20 +104,14 @@ public class Main extends Application {
             if (dayChanged) {
                 // 日付が変わっていたら自動で今日に移動
                 datePicker.setValue(LocalDate.now());
-                try {
-                    Desktop.getDesktop().browse(new URI(SYSTEM_URL));
-                } catch (IOException | URISyntaxException error) {
-                    error.printStackTrace();
-                }
+                this.openKing();
             }
 
-            updateLabel.setText("最終データ更新：" + updatedFormatter.format(ZonedDateTime.now()));
             this.prevPosition = position;
         }));
         timer.setCycleCount(Timeline.INDEFINITE);
         timer.play();
 
-        datePicker.setValue(this.selectedDate);
     }
 
     private void update(Day day) {
@@ -113,6 +127,7 @@ public class Main extends Application {
         } else {
             this.resultText.setText("この日のデータはないようです");
         }
+        this.updateLabel.setText("最終データ更新：" + updatedFormatter.format(ZonedDateTime.now()));
     }
 
     private Day calc(LocalDate date) {
@@ -173,7 +188,16 @@ public class Main extends Application {
         }
     }
 
+    private void openKing() {
+        try {
+            Desktop.getDesktop().browse(new URI(SYSTEM_URL));
+        } catch (IOException | URISyntaxException error) {
+            error.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
+        PlatformImpl.setTaskbarApplication(false);
         launch(args);
     }
 }
