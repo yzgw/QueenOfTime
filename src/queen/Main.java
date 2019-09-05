@@ -135,6 +135,9 @@ public class Main extends Application {
 
         try {
             File file = new File(FILE_PATH);
+            if (!file.exists()) {
+                return null;
+            }
             BufferedReader reader = new BufferedReader(new FileReader(file));
             String line;
             while ((line = reader.readLine()) != null) {
@@ -148,8 +151,8 @@ public class Main extends Application {
             }
         } catch (IOException error) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("ファイルの書き込み失敗");
-            alert.setContentText("ファイルの書き込みに失敗しました。開発者にご連絡ください");
+            alert.setTitle("ファイルの読み込み失敗");
+            alert.setContentText("ファイルの読み込みに失敗しました。開発者にご連絡ください");
             alert.showAndWait();
             Platform.exit();
         }
@@ -182,7 +185,7 @@ public class Main extends Application {
         } catch (IOException error) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("ファイルの書き込み失敗");
-            alert.setContentText("ファイルの書き込みに失敗しました。開発者にご連絡ください");
+            alert.setContentText("ファイルの書き込みに失敗しました。開発者にご連絡ください。" + error);
             alert.showAndWait();
             Platform.exit();
         }
