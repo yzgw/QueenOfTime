@@ -27,12 +27,16 @@ import java.util.ArrayList;
 
 public class Main extends Application {
 
-    private static final int INTERVAL_SEC = 10;
+    // 操作のチェックの感覚
+    private static final int INTERVAL_SEC = 30;
 
+    // 最後の操作からこの時間以上経っていたら日付を今日にする
     private static final int DAY_JUMP_HOUR = 8;
 
+    // ログのパス
     private static final String FILE_PATH = "./log.txt";
 
+    // 勤怠ボンタンで開くURL
     private static final String SYSTEM_URL = "https://s2.kingtime.jp/independent/recorder/personal/";
 
     private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
